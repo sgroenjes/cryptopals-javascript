@@ -1,15 +1,13 @@
 const fs = require('fs');
 
-function AES_ECB_Detect() {
+exports.AES_ECB_Detect = function AES_ECB_Detect(ciphertext) {
   //each line is 320 characters long
   let flagged = [];
-  var lines = fs.readFileSync('./8.txt','utf-8').match(/.{320}/g);
+  if(!ciphertext) {
+    ciphertext = fs.readFileSync('./8.txt','utf-8').match(/.{320}/g);
+  }
   
-  //try easy check
-  //the same 16 byte plaintext will always produce the same 16 byte ciphertext
-  //if there are copies of 16 byte blocks in the string
-  // console.log(lines.length)
-  lines.forEach((line,lineIndex) => {
+  ciphertext.forEach((line,lineIndex) => {
     let blocks = line.match(/.{16}/g);
     blocks.sort(function(a,b) {
       return parseInt(a,'16') - parseInt(b,'16');
@@ -19,9 +17,7 @@ function AES_ECB_Detect() {
         flagged.push(lineIndex);
     })
   });
-  // console.log(flagged);
-  console.log(lines[132].match(/.{16}/g).sort(function(a,b) {
-    return parseInt(a,'16') - parseInt(b,'16');
-  }))
+  if(flagged.length>1)
+    return true;
+  return false;
 }
-AES_ECB_Detect()

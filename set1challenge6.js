@@ -1,10 +1,14 @@
 const fs = require('fs');
 const convert = require('./hexToB64');
 const c3 = require('./set1challenge3.js');
-function BreakRepeatingKeyXOR() {
-  var lines = fs.readFileSync('./6.txt', 'utf-8')
-    .split('\n').join('');
-  var hexCodes = convert.base64ToHex(lines).replace(/\s/g,'');
+
+exports.guessKeySize = guessKeySize;
+function guessKeySize(data) {
+  if(!data) {
+    data = fs.readFileSync('./6.txt', 'utf-8')
+      .split('\n').join('');
+  }
+  var hexCodes = convert.base64ToHex(data).replace(/\s/g,'');
   var hammies = [];
   for(var keysize=2;keysize<=40;keysize++) {
     var runningHams = [];
@@ -24,14 +28,21 @@ function BreakRepeatingKeyXOR() {
     });
   }
   hammies.sort(function(a,b) { return a.hammy-b.hammy });
-  var ProbableKeySize = hammies[0].keysize;
-  keysizeByteArray = hexCodes.match(new RegExp(`.{1,${ProbableKeySize*2}}`,'g'))
+  return {
+    keysize: hammies[0].keysize,
+    hexCodes
+  };
+}
+
+function BreakRepeatingKeyXOR() {
+  var {keysize,hexCodes} = guessKeySize()
+  keysizeByteArray = hexCodes.match(new RegExp(`.{1,${keysize*2}}`,'g'))
   transposedByteArray = [];
-  for(var i=0;i<ProbableKeySize;i++) {
+  for(var i=0;i<keysize;i++) {
     transposedByteArray[i] = '';
   }
   keysizeByteArray.forEach(ksb => {
-    for(var i=0;i<ProbableKeySize*2;i+=2) {
+    for(var i=0;i<keysize*2;i+=2) {
       transposedByteArray[i/2] += ksb[i]+ksb[i+1]
     }
   });

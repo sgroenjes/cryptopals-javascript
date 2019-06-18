@@ -7,9 +7,16 @@ const padding = require('./set2challenge9.js');
 //using this key and initialization vector
 const keyBuffer = Buffer.from("YELLOW SUBMARINE");
 const IV = "".padStart(32,"0")
-const aesEcb = new aesjs.ModeOfOperation.ecb(keyBuffer);
 
-exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext) {
+exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext,key,iv) {
+  if(!key) {
+    key = keyBuffer
+  }
+  if(!iv) {
+    iv = IV
+  }
+  const aesEcb = new aesjs.ModeOfOperation.ecb(key);
+  
   //read from file if no argument
   var lines;
   if(!ciphertext) {
@@ -42,7 +49,7 @@ exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext) {
   var plainHex = [];
   decryptedHexBlocks.forEach(dhb => {
     if(plainHex.length==0){
-      plainHex.push(XOR.hexXOR(dhb,IV))
+      plainHex.push(XOR.hexXOR(dhb,iv))
     }
     else {
       plainHex.push(XOR.hexXOR(dhb,hexBlocks[plainHex.length-1]))
@@ -56,29 +63,39 @@ exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext) {
   return plaintext;
 }
 
-exports.AES_CBC_Encrypt = function AES_CBC_Encrypt(plaintext) {
-  // console.log(plaintext);
+exports.AES_CBC_Encrypt = function AES_CBC_Encrypt(plaintext,key,iv) {
+  if(!key) {
+    key = keyBuffer
+  }
+  if(!iv) {
+    iv = IV
+  }
+  const aesEcb = new aesjs.ModeOfOperation.ecb(key);
   //convert to hex
   var hexCodes = aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(plaintext));
+  
   //add padding to hex encoded string using 16 byte block
   hexCodes = padding.PKCS7(hexCodes,16);
+  
   //break into blocks
   var hexBlocks = hexCodes.match(/.{1,32}/g);
+  
   //XOR with last cipher block or IV (if 1st block)
   var cipherHex = [];
   hexBlocks.forEach((hb,index) => {
     let xorBlock;
     if(cipherHex.length==0) {
-      xorBlock = XOR.hexXOR(hb,IV)
+      xorBlock = XOR.hexXOR(hb,iv)
     }
     else {
       xorBlock = XOR.hexXOR(hb,cipherHex[cipherHex.length-1])
     }
-    // console.log(xorBlock+" result hex xor")
     //convert to bytes with utils
     let byteBlock = aesjs.utils.hex.toBytes(xorBlock)
+    
     //pass block to aesEcb.encrypt
     let decryptedByteBlock = aesEcb.encrypt(byteBlock);
+    
     //convert to hex with utils & push to cipher hex array
     cipherHex.push(aesjs.utils.hex.fromBytes(decryptedByteBlock));
   })
