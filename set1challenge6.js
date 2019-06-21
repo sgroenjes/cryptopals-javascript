@@ -59,7 +59,7 @@ function BreakRepeatingKeyXOR() {
   })
   // console.log(hammies);
   // console.log(key);
-  console.log(plaintext);
+  // console.log(plaintext);
 }
 
 function hammingDistance(string1,string2) {

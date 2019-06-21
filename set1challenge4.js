@@ -10,7 +10,7 @@ function bestXORLine() {
   lines.sort(function(a,b) {
     return b.score - a.score;
   })
-  console.log(lines[0].string);
+  // console.log(lines[0].string);
 }
 
 bestXORLine();

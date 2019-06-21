@@ -22,7 +22,7 @@ function randomHexBytes(num) {
 }
 
 exports.encryptUnknownKey = encryptUnknownKey;
-function encryptUnknownKey(data,mode,key) {
+function encryptUnknownKey(data,mode,key,hex) {
   if(!mode) {
     mode = Math.floor(Math.random()*2);
   }
@@ -34,11 +34,13 @@ function encryptUnknownKey(data,mode,key) {
   if(!key) {
     key = randomAESkey();
   }
-  
+  if(hex==undefined) {
+    hex=false
+  }
   let padStart = randomHexBytes(Math.floor(Math.random()*6)+5)
   let padEnd = randomHexBytes(Math.floor(Math.random()*6)+5)
-  let hexDataWithRand = aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(data));
-  hexDataWithRand = hexDataWithRand.concat(padEnd).replace (/^/,padStart);
+  let hexDataWithRand = hex ? data : aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(data));
+  // hexDataWithRand = hexDataWithRand.concat(padEnd).replace (/^/,padStart);
   let byteData = aesjs.utils.hex.toBytes(hexDataWithRand)
   let iv = randomHexBytes(16);
   let B64encrypted = mode == 1 ? 
