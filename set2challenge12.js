@@ -1,24 +1,26 @@
 const oracle = require('./set2challenge11')
 const convert = require('./hexToB64')
-const findKeySize = require('./set1challenge6')
-const ecbDetect = require('./set1challenge8')
 const aesjs = require('aes-js')
 //don't do it
-let plainHex = convert.base64ToHex("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK");
-let undefinedCounter = 0;
+let challenge12Hex = convert.base64ToHex("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK");
 var keyArr = []
 for(let i=0;i<16;i++) {
   keyArr.push(Math.floor(Math.random()*256));
 }
 
-function newOracle(yourstring) {
+exports.oracle = newOracle;
+function newOracle(yourstring,plainHex) {
   var hexCodes = yourstring.concat(plainHex);
-  var data = oracle.encryptUnknownKey(hexCodes,"ECB",keyArr,true);
+  var utf8Codes = aesjs.utils.utf8.fromBytes(aesjs.utils.hex.toBytes(hexCodes))
+  var data = oracle.encryptUnknownKey(utf8Codes,"ECB",keyArr,false);
   return data;
 }
-
-function ECB_Decryption() {
+exports.ECB_Decryption = ECB_Decryption;
+function ECB_Decryption(plainHex) {
   var unknownHex = "";
+  if(!plainHex) {
+    plainHex = challenge12Hex;
+  }
   while(plainHex.length > 0) {
 
     // var trialDictionary = new Map();
@@ -49,10 +51,9 @@ function ECB_Decryption() {
     while(inputBlock.length < (keySize-1)*2) {
       inputBlock = inputBlock.concat('aa');
     }
-    var hexKey = convert.base64ToHex(newOracle(inputBlock).B64encrypted).slice(0,2*keySize);
+    var hexKey = convert.base64ToHex(newOracle(inputBlock,plainHex).B64encrypted).slice(0,2*keySize);
     var dictionary = new Map();
     //make dictionary of every possible last byte
-    //TODO: need to use values that don't return uri malformed error, but also don't return undefined in the dictionary
     for(let i = 0; i<128;i++) {
       let hex = i.toString(16).padStart(2,'0')
       let fullhex = convert.base64ToHex(newOracle(inputBlock.concat(hex)).B64encrypted).slice(0,2*keySize)
@@ -63,15 +64,12 @@ function ECB_Decryption() {
     //match output of the one-byte-short input to one of the entries in the dictionary
     let hexCode = dictionary.get(hexKey)
     // console.log(hexCode)
-    if(hexCode!=undefined)
-      unknownHex = unknownHex.concat(hexCode)
-    else
-      undefinedCounter++;
+    unknownHex = unknownHex.concat(hexCode)
     //repeat for all bytes
     plainHex = plainHex.slice(2,plainHex.length);
     // console.log("Remaining string length: "+plainHex.length)
   }
-  console.log(aesjs.utils.utf8.fromBytes(aesjs.utils.hex.toBytes(unknownHex)))
+  return aesjs.utils.utf8.fromBytes(aesjs.utils.hex.toBytes(unknownHex));
 }
 
-ECB_Decryption();
+// console.log(ECB_Decryption(aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes('some random text I just made up LOL'))))

@@ -22,9 +22,12 @@ exports.AES_ECB_Decrypt = function AES_ECB_Decrypt(ciphertext,key) {
   var hexCodes = convert.base64ToHex(lines);
   
   var textBytes = aesjs.utils.hex.toBytes(hexCodes);
-  
   var decryptedBytes = aesEcb.decrypt(textBytes);
-
+  var decryptedHex = aesjs.utils.hex.fromBytes(decryptedBytes);
+  // remove padding
+  var lastByte = parseInt(decryptedHex.slice(decryptedHex.length-2,decryptedHex.length),10)
+  decryptedHex = decryptedHex.slice(0,decryptedHex.length-lastByte*2)
+  decryptedBytes = aesjs.utils.hex.toBytes(decryptedHex);
   var decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
   return decryptedText;
 }
