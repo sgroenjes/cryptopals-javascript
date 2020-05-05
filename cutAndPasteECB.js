@@ -1,7 +1,8 @@
-const ecb = require('./set1challenge7')
+//SET 2 CHALLENGE 13
+const ecb = require('./decryptAESinECBmode.js')
 var KEY = randomAESkey()
 const convert = require('./hexToB64')
-const padding = require('./set2challenge9')
+const padding = require('./pkcs7Padding.js')
 const aesjs = require('aes-js')
 
 function parseObjectString(text) {
@@ -67,8 +68,9 @@ function changeRole() {
   var a = aesjs.utils.utf8.fromBytes(aesjs.utils.hex.toBytes(padding.PKCS7(aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes("admin")),16)))
   var sp = "   "
   var profile = profile_for(email+a+sp);
+  // console.log(profile)
   var ciphertext = convert.base64ToHex(encryptProfile(profile))
-  var adminCipher = ciphertext.slice(0,32).concat(ciphertext.slice(64,96),ciphertext.slice(32,64))
+  var adminCipher = ciphertext.slice(0,32).concat(ciphertext.slice(64,96),ciphertext.slice(32,64)) //overwrite our role
   return adminCipher;
 }
 

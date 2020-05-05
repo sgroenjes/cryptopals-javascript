@@ -1,3 +1,4 @@
+//SET 1 CHALLENGE 8
 const fs = require('fs');
 
 exports.AES_ECB_Detect = function AES_ECB_Detect(ciphertext) {
@@ -17,7 +18,12 @@ exports.AES_ECB_Detect = function AES_ECB_Detect(ciphertext) {
         flagged.push(lineIndex);
     })
   });
-  if(flagged.length>1)
+  if(flagged.length>1) {
+    // console.log("Following line has blocks that match:")
+    // console.log(ciphertext[flagged[0]].match(/.{16}/g).sort((a,b)=>{ return parseInt(a,'16')-parseInt(b,'16')}))
     return true;
+  }
   return false;
 }
+
+// this.AES_ECB_Detect()

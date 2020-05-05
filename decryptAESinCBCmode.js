@@ -1,8 +1,10 @@
+//SET 2 CHALLENGE 10
 const fs = require('fs');
 const convert = require('./hexToB64');
 const aesjs = require('aes-js');
-const XOR = require('./XOR.js');
-const padding = require('./set2challenge9.js');
+const XOR = require('./fixedXOR.js');
+const padding = require('./pkcs7Padding.js');
+const ecbMode = require('./decryptAESinECBmode.js')
 
 //using this key and initialization vector
 const keyBuffer = Buffer.from("YELLOW SUBMARINE");
@@ -25,6 +27,7 @@ exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext,key,iv) {
   else {
     lines = ciphertext
   } 
+
   //convert from base64 to hex
   var hexCodes = convert.base64ToHex(lines);
 
@@ -35,7 +38,7 @@ exports.AES_CBC_Decrypt = function AES_CBC_Decrypt(ciphertext,key,iv) {
     return aesjs.utils.hex.toBytes(hb);
   })
 
-  //pass block to aesEcb.decrypt
+  //pass blocks to aesEcb.decrypt
   var decryptedByteBlocks = byteBlocks.map(bblock => {
     return aesEcb.decrypt(bblock);
   })
@@ -103,3 +106,5 @@ exports.AES_CBC_Encrypt = function AES_CBC_Encrypt(plaintext,key,iv) {
   //join array and convert to base64
   return convert.hexToBase64(cipherHex.join(''));
 }
+
+// console.log(this.AES_CBC_Decrypt(this.AES_CBC_Encrypt(this.AES_CBC_Decrypt())))

@@ -1,7 +1,10 @@
-//Set 1 Challenge 1
+//SET 1 CHALLENGE 1
 var tableStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 var table = tableStr.split("");
 
+/*****
+ * Decode a base-64 encoded string
+ */
 atob = function (base64) {
   if (/(=[^=]+|={3,})$/.test(base64)) throw new Error("String contains an invalid character");
   let equalsCount = (base64.match(/=/g) || []).length;
@@ -27,6 +30,9 @@ atob = function (base64) {
   return xz;
 };
 
+/*****
+ * Encode a string in base-64
+ */
 btoa = function (bin) {
   for (var i = 0, j = 0, len = bin.length / 3, base64 = []; i < len; ++i) {
     var a = bin.charCodeAt(j++), b = bin.charCodeAt(j++), c = bin.charCodeAt(j++);
@@ -37,6 +43,8 @@ btoa = function (bin) {
   }
   return base64.join("");
 };
+exports.atob = atob
+exports.btoa = btoa
 
 exports.hexToBase64 = function hexToBase64(str) {
   return btoa(String.fromCharCode.apply(null,
@@ -52,3 +60,6 @@ exports.base64ToHex = function base64ToHex(str) {
   }
   return hex.join("");
 }
+
+// console.log(this.hexToBase64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"))
+// console.log("SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")

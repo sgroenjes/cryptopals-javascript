@@ -1,4 +1,5 @@
-var c3 = require('./set1challenge3.js');
+//SET 1 CHALLENGE 4
+var c3 = require('./singleByteXORcipher.js');
 const fs = require('fs');
 
 function bestXORLine() {
@@ -13,4 +14,4 @@ function bestXORLine() {
   // console.log(lines[0].string);
 }
 
-bestXORLine();
+// bestXORLine();

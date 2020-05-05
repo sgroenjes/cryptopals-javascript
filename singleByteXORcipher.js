@@ -1,3 +1,4 @@
+//SET 1 CHALLENGE 3
 var alphabet = {
   a: 0.082,
   b: 0.015,
@@ -53,3 +54,6 @@ exports.singleByteXOR = function singleByteXOR(hex) {
   }
   return results[maxScoreIndex];
 }
+
+// 🎶🎶 play that funky music 🎶🎶
+// console.log(this.singleByteXOR("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"))

@@ -1,7 +1,8 @@
-const ecb = require('./set1challenge7')
-const cbc = require('./set2challenge10')
+//SET 2 CHALLENGE 11
+const ecb = require('./decryptAESinECBmode.js')
+const cbc = require('./decryptAESinCBCmode.js')
 const aesjs = require('aes-js')
-const ecbDetect = require('./set1challenge8')
+const ecbDetect = require('./detectAESinECBmode.js')
 const convert = require('./hexToB64')
 
 function randomAESkey() {
@@ -22,7 +23,7 @@ function randomHexBytes(num) {
 }
 
 exports.encryptUnknownKey = encryptUnknownKey;
-function encryptUnknownKey(data,mode,key,hex) {
+function encryptUnknownKey(data,withRandomPadding,mode,key,hex) {
   if(!mode) {
     mode = Math.floor(Math.random()*2);
   }
@@ -39,13 +40,13 @@ function encryptUnknownKey(data,mode,key,hex) {
   }
   let padStart = randomHexBytes(Math.floor(Math.random()*6)+5)
   let padEnd = randomHexBytes(Math.floor(Math.random()*6)+5)
-  let hexDataWithRand = hex ? data : aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(data));
-  // hexDataWithRand = hexDataWithRand.concat(padEnd).replace (/^/,padStart);
-  let byteData = aesjs.utils.hex.toBytes(hexDataWithRand)
-  let iv = randomHexBytes(16);
+  let hexData = hex ? data : aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(data));
+  let hexDataWithRand = padStart + hexData + padEnd
+  hexData = withRandomPadding ? hexDataWithRand : hexData
+  let iv = randomHexBytes(16);//key.length??
   let B64encrypted = mode == 1 ? 
-    ecb.AES_ECB_Encrypt(aesjs.utils.utf8.fromBytes(byteData),key) :
-    cbc.AES_CBC_Encrypt(aesjs.utils.utf8.fromBytes(byteData),key,iv);
+    ecb.AES_ECB_Encrypt(hexData,key,true) :
+    cbc.AES_CBC_Encrypt(hexData,key,iv);
   return {
     B64encrypted,
     mode
@@ -58,28 +59,38 @@ function guessEncryption(encryptionFunction) {
   if(!encryptionFunction) { //should return encrypted data and mode used ( for sanity checks )
     encryptionFunction = encryptUnknownKey;
   }
-  //48 bytes of As
+  //64 bytes of As
   let plaintext = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
   var ECB = 0;
   var CBC = 0;
+  var ECBguess = 0;
+  var CBCguess = 0;
   var tries = 1000
   for(let i = 0; i < tries;i++) {
     //encrypt with either ECB or CBC
-    let data = encryptionFunction(plaintext);
+    let data = encryptionFunction(plaintext,true);
     let mode = data.mode;
     let encryptedData = data.B64encrypted;
     //convert the b64 to hex
     let hexData = convert.base64ToHex(encryptedData);
 
     //if repeated blocks, its ecb otherwise should be cbc
-    if(ecbDetect.AES_ECB_Detect([hexData]) && mode == 1) {
+    if(ecbDetect.AES_ECB_Detect([hexData]))
+      ECBguess++;
+    else
+      CBCguess++;
+
+    if(typeof mode != "number") {
+      //mode was not recorded
+    }
+    else if (mode == 1)
       ECB++;
-    }
-    else if(mode==0){
+    else
       CBC++;
-    }
+    
   }
-  return ECB > CBC ? "ECB" : "CBC";
+  // console.log({ ECB, ECBguess, CBC, CBCguess })
+  return ECBguess > CBCguess ? "ECB" : "CBC";
 }
 
-guessEncryption();
+// console.log(guessEncryption());

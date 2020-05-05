@@ -1,21 +1,22 @@
+//SET 1 CHALLENGE 6
 const fs = require('fs');
 const convert = require('./hexToB64');
-const c3 = require('./set1challenge3.js');
+const c3 = require('./singleByteXORcipher.js');
 
 exports.guessKeySize = guessKeySize;
 function guessKeySize(data) {
   if(!data) {
-    data = fs.readFileSync('./6.txt', 'utf-8')
-      .split('\n').join('');
+    data = fs.readFileSync('./6.txt', 'utf-8').split('\n').join('');
   }
   var hexCodes = convert.base64ToHex(data).replace(/\s/g,'');
+  // console.log("guess key size hex: ",hexCodes)
   var hammies = [];
-  for(var keysize=2;keysize<=40;keysize++) {
+  for(var keysize=2;keysize<=64;keysize++) {
     var runningHams = [];
     for(var j=0;j<hexCodes.length-(j+2)*2*keysize;j++) {
       let one = hexCodes.slice(j*2*keysize,(j+1)*2*keysize);
       let two = hexCodes.slice((j+1)*2*keysize,(j+2)*2*keysize);
-      runningHams.push(hammingDistance(one,two)/keysize);
+      runningHams.push(hammingDistance(one,two)/(keysize*2));
     }
     let score = 0;
     runningHams.forEach(rh => {
@@ -28,8 +29,10 @@ function guessKeySize(data) {
     });
   }
   hammies.sort(function(a,b) { return a.hammy-b.hammy });
+  // console.log(hammies)
   return {
     keysize: hammies[0].keysize,
+    score: hammies[0].hammy,
     hexCodes
   };
 }
@@ -57,7 +60,6 @@ function BreakRepeatingKeyXOR() {
     let charCode = parseInt(byte,16)
     plaintext += String.fromCharCode(keyXOR^charCode)
   })
-  // console.log(hammies);
   // console.log(key);
   // console.log(plaintext);
 }
@@ -78,4 +80,7 @@ function hammingDistance(string1,string2) {
   return totalDiffBits;
 }
 
-BreakRepeatingKeyXOR();
+// console.log(convert.base64ToHex(convert.btoa("this is a test")).match(/.{1,2}/g).map(n => { return parseInt(n,16) }).join(' '))
+// console.log(convert.base64ToHex(convert.btoa("wokka wokka!!!")).match(/.{1,2}/g).map(n => { return parseInt(n,16) }).join(' '))
+// console.log(hammingDistance(convert.base64ToHex(convert.btoa("this is a test")),convert.base64ToHex(convert.btoa("wokka wokka!!!"))))
+// BreakRepeatingKeyXOR();

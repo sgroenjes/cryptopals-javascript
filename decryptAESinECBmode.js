@@ -1,11 +1,12 @@
+//SET 1 CHALLENGE 7
 const fs = require('fs');
 const convert = require('./hexToB64');
 const aesjs = require('aes-js');
-const padding = require('./set2challenge9.js');
+const padding = require('./pkcs7Padding.js');
 
 var keyBuffer = Buffer.from("YELLOW SUBMARINE");
 
-
+//take encrypted base64, returns decrypted plaintext
 exports.AES_ECB_Decrypt = function AES_ECB_Decrypt(ciphertext,key) {
   var lines;
   if(!key) {
@@ -32,16 +33,20 @@ exports.AES_ECB_Decrypt = function AES_ECB_Decrypt(ciphertext,key) {
   return decryptedText;
 }
 
-exports.AES_ECB_Encrypt = function AES_ECB_Encrypt(plaintext,key) {
+//takes plaintext, returns encrypted in base64
+exports.AES_ECB_Encrypt = function AES_ECB_Encrypt(plaintext,key,inHex) {
   if(!key) {
     key = keyBuffer
   }
   var aesEcb = new aesjs.ModeOfOperation.ecb(key);
-  var hexCodes = aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(plaintext));
-  hexCodes = padding.PKCS7(hexCodes,16);
-  var textBytes = aesjs.utils.hex.toBytes(hexCodes);
-  var encryptedBytes = aesEcb.encrypt(textBytes);
-  var encryptHex = aesjs.utils.hex.fromBytes(encryptedBytes);
+  var hexCodes = inHex ? plaintext : aesjs.utils.hex.fromBytes(aesjs.utils.utf8.toBytes(plaintext));
+  hexCodes = padding.PKCS7(hexCodes,key.length);
+  var hexBytes = aesjs.utils.hex.toBytes(hexCodes);
+  var encryptedHexBytes = aesEcb.encrypt(hexBytes);
+  var encryptHex = aesjs.utils.hex.fromBytes(encryptedHexBytes);
   var encryptB64 = convert.hexToBase64(encryptHex);
   return encryptB64;
 }
+
+// console.log(this.AES_ECB_Decrypt())
+// console.log(this.AES_ECB_Decrypt(this.AES_ECB_Encrypt("I'm like Samson -- Samson to Delilah")))

@@ -1,4 +1,4 @@
-//Set 1 Challenge 2
+//SET 1 CHALLENGE 2
 function hex2bin(hex) {
   return (parseInt(hex,16).toString(2)).padStart(8,'0');
 }
@@ -20,3 +20,6 @@ exports.hexXOR = function XOR(hexString1, hexString2) {
   })
   return xor;
 }
+
+// console.log(this.hexXOR("1c0111001f010100061a024b53535009181c","686974207468652062756c6c277320657965"))
+// console.log("746865206b696420646f6e277420706c6179")
